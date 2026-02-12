@@ -1,7 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Heart } from "lucide-react";
 
 export default function App() {
   const [accepted, setAccepted] = useState(false);
@@ -14,64 +12,53 @@ export default function App() {
   };
 
   useEffect(() => {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+    const startAudio = () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    oscillator.type = "sawtooth";
-    oscillator.frequency.setValueAtTime(55, ctx.currentTime);
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    gainNode.gain.setValueAtTime(0.02, ctx.currentTime);
+      oscillator.type = "sawtooth";
+      oscillator.frequency.setValueAtTime(55, ctx.currentTime);
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      gainNode.gain.setValueAtTime(0.02, ctx.currentTime);
+      oscillator.start();
 
-    oscillator.start();
-
-    return () => {
-      oscillator.stop();
-      ctx.close();
+      document.removeEventListener("click", startAudio);
     };
+
+    document.addEventListener("click", startAudio);
   }, []);
 
   return (
     <div className="container">
       <div className="flicker-overlay"></div>
 
-      <motion.h1
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1.5 }}
-        className="title"
-      >
+      <h1 className="title">
         {accepted
           ? "You Escaped the Upside Down ❤️"
           : "Will You Be My Valentine?"}
-      </motion.h1>
+      </h1>
 
       {!accepted ? (
         <div className="buttons">
           <button className="yes" onClick={() => setAccepted(true)}>
-            Yes <Heart size={18} />
+            Yes ❤️
           </button>
 
-          <motion.button
+          <button
             className="no"
             onMouseEnter={moveNoButton}
-            animate={{ x: noPosition.x, y: noPosition.y }}
-            transition={{ type: "spring", stiffness: 300 }}
+            style={{ transform: `translate(${noPosition.x}px, ${noPosition.y}px)` }}
           >
             No
-          </motion.button>
+          </button>
         </div>
       ) : (
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-          className="message"
-        >
+        <p className="message">
           Looks like we’re binge-watching forever together in Hawkins.
-        </motion.p>
+        </p>
       )}
 
       <style>{`
@@ -132,6 +119,7 @@ export default function App() {
         .no {
           background: #111;
           color: #ff4d4d;
+          position: relative;
         }
 
         .message {
