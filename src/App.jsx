@@ -1,23 +1,35 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 export default function App() {
-  const audioRef = useRef(null);
 
   useEffect(() => {
-    const startMusic = () => {
-      if (audioRef.current) {
-        audioRef.current.play().catch(() => {});
-      }
-      document.removeEventListener("click", startMusic);
+    const handleClick = () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(55, ctx.currentTime);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      gain.gain.setValueAtTime(0.03, ctx.currentTime);
+
+      osc.start();
+
+      document.removeEventListener("click", handleClick);
     };
 
-    document.addEventListener("click", startMusic);
+    document.addEventListener("click", handleClick);
   }, []);
 
   const moveButton = (e) => {
     const button = e.target;
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 50);
+    const x = Math.random() * window.innerWidth - 100;
+    const y = Math.random() * window.innerHeight - 50;
 
     button.style.position = "absolute";
     button.style.left = `${x}px`;
@@ -30,13 +42,6 @@ export default function App() {
 
   return (
     <div className="container">
-      {/* Background Music */}
-      <audio
-        ref={audioRef}
-        src="/stranger-things.mp3"
-        loop
-      />
-
       <div className="overlay"></div>
       <div className="lightning"></div>
 
